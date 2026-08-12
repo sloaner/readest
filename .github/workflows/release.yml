@@ -74,7 +74,8 @@ jobs:
             const notes = process.env.release_note.split(/\d+\.\s/).filter(Boolean);
             const formattedNotes = notes.map(note => `* ${note.trim()}`).join("\n");
             const body = `## Release Highlight\n${formattedNotes}\n\n${data.body}`;
-            github.rest.repos.updateRelease({
+            core.setOutput('RELEASE_DESCRIPTION', body);
+            await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
@@ -82,6 +83,13 @@ jobs:
               draft: false,
               prerelease: false
             })
+      - name: send release description to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          RELEASE_DESCRIPTION="${{ steps.update-release.outputs.RELEASE_DESCRIPTION }}"
+          PAYLOAD=$(jq -n --arg content "$RELEASE_DESCRIPTION" '{content: $content}')
+          curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
 
   build-koreader-plugin:
     needs: get-release
