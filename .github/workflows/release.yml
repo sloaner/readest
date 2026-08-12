@@ -35,7 +35,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             })
-            console.log(JSON.stringify(data));
             core.setOutput('release_id', data.id);
             core.setOutput('release_tag', data.tag_name);
             core.setOutput('release_title', data.name);
@@ -82,7 +81,7 @@ jobs:
             })
             const notes = process.env.release_note.split(/\d+\.\s/).filter(Boolean);
             const formattedNotes = notes.map(note => `* ${note.trim()}`).join("\n");
-            const body = `## Release Highlight\n${formattedNotes}\n\n${data.body}`;
+            const body = `## Release Highlights\n${formattedNotes}\n\n${data.body}`;
 
             core.setOutput('release_description', body);
 
@@ -106,8 +105,6 @@ jobs:
         with:
           script: |
             let payload = process.env.release_description;
-            console.log(JSON.stringify(context));
-            console.log(JSON.stringify(payload));
 
             // Replace @username with markdown link
             payload = payload.replace(
@@ -132,6 +129,7 @@ jobs:
             // Reinsert the original markdown links
             payload = processedText.replace(/__MARKDOWN_LINK_PLACEHOLDER_(\d+)__/g, (match, index) => markdownLinks[parseInt(index, 10)]);
             
+            // Enforce Discord's max lengths
             const embedTitle = (process.env.release_title || process.env.release_tag || '').substring(0, 256);
             const embedUrl = process.env.release_url;
             const embedDescription = (payload || '').substring(0, 4096);
@@ -174,7 +172,6 @@ jobs:
             }
 
   build-koreader-plugin:
-    if: false
     needs: get-release
     permissions:
       contents: write
@@ -210,7 +207,6 @@ jobs:
           gh release upload ${{ needs.get-release.outputs.release_tag }} ${plugin_zip} --clobber
 
   build-calibre-plugin:
-    if: false
     needs: get-release
     permissions:
       contents: write
@@ -238,7 +234,6 @@ jobs:
           gh release upload ${{ needs.get-release.outputs.release_tag }} ${plugin_zip} --clobber
 
   build-browser-extension:
-    if: false
     needs: get-release
     permissions:
       contents: write
@@ -271,7 +266,6 @@ jobs:
           gh release upload "${{ needs.get-release.outputs.release_tag }}" "${extension_zip}" --clobber
 
   build-tauri:
-    if: false
     needs: get-release
     permissions:
       contents: write
