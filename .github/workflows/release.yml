@@ -33,6 +33,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             })
+            console.log(JSON.stringify(data));
             core.setOutput('release_id', data.id);
             core.setOutput('release_tag', data.tag_name);
       - name: get release notes
