@@ -91,8 +91,8 @@ jobs:
           release_description: ${{ steps.update-release.outputs.release_description }}
         with:
           script: |
-            let payload = JSON.stringify({ content: process.env.release_description });
-            console.log(payload);
+            let payload = process.env.release_description;
+            console.log(JSON.stringify(payload));
 
             // Replace @username with markdown link
             payload = payload.replace(
@@ -117,14 +117,14 @@ jobs:
             // Reinsert the original markdown links
             payload = processedText.replace(/__MARKDOWN_LINK_PLACEHOLDER_(\d+)__/g, (match, index) => markdownLinks[parseInt(index, 10)]);
             
-            console.log(payload);
+            console.log(JSON.stringify(payload));
             
             let attempt = 0;
             while (attempt <= 3) {
                 try {
                     const response = await fetch(`${process.env.discord_webhook}?wait=true`, {
                         method: 'POST',
-                        body: payload,
+                        body: JSON.stringify({ content: "", embeds: [{ description: payload }]}),
                         headers: { 'Content-Type': 'application/json' }
                     });
                     if (response.status === 429) {
