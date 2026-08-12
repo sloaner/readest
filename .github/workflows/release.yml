@@ -57,6 +57,10 @@ jobs:
     needs: get-release
 
     steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
       - name: update release
         id: update-release
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
@@ -92,7 +96,7 @@ jobs:
         with:
           script: |
             let payload = process.env.release_description;
-            console.log(JSON.stringify(github.context.payload.release));
+            console.log(JSON.stringify(github));
             console.log(JSON.stringify(payload));
 
             // Replace @username with markdown link
