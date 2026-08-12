@@ -127,6 +127,7 @@ jobs:
                         body: JSON.stringify({
                             username: 'GitHub',
                             avatar_url: 'https://avatars.githubusercontent.com/u/9919',
+                            content: 'New Release',
                             embeds: [{
                                 description: payload
                             }]
