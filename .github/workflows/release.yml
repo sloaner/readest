@@ -92,6 +92,7 @@ jobs:
         with:
           script: |
             let payload = process.env.release_description;
+            console.log(JSON.stringify(github.context.payload.release));
             console.log(JSON.stringify(payload));
 
             // Replace @username with markdown link
@@ -127,8 +128,8 @@ jobs:
                         body: JSON.stringify({
                             username: 'GitHub',
                             avatar_url: 'https://avatars.githubusercontent.com/u/9919',
-                            content: 'New Release',
                             embeds: [{
+                                title: 'New Release',
                                 description: payload
                             }]
                         }),
