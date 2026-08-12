@@ -15,10 +15,10 @@ jobs:
     outputs:
       release_id: ${{ steps.get-release.outputs.release_id }}
       release_tag: ${{ steps.get-release.outputs.release_tag }}
+      release_title: ${{ steps.get-release.outputs.release_title }}
+      release_url: ${{ steps.get-release.outputs.release_url }}
       release_note: ${{ steps.get-release-notes.outputs.release_note }}
       release_version: ${{ steps.get-release-notes.outputs.release_version }}
-      release_title: ${{ steps.get-release-notes.outputs.release_title }}
-      release_url: ${{ steps.get-release-notes.outputs.release_url }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
