@@ -92,6 +92,7 @@ jobs:
           curl -X POST -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
 
   build-koreader-plugin:
+    if: false
     needs: get-release
     permissions:
       contents: write
@@ -127,6 +128,7 @@ jobs:
           gh release upload ${{ needs.get-release.outputs.release_tag }} ${plugin_zip} --clobber
 
   build-calibre-plugin:
+    if: false
     needs: get-release
     permissions:
       contents: write
@@ -154,6 +156,7 @@ jobs:
           gh release upload ${{ needs.get-release.outputs.release_tag }} ${plugin_zip} --clobber
 
   build-browser-extension:
+    if: false
     needs: get-release
     permissions:
       contents: write
@@ -186,6 +189,7 @@ jobs:
           gh release upload "${{ needs.get-release.outputs.release_tag }}" "${extension_zip}" --clobber
 
   build-tauri:
+    if: false
     needs: get-release
     permissions:
       contents: write
