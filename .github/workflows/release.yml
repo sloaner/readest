@@ -17,6 +17,8 @@ jobs:
       release_tag: ${{ steps.get-release.outputs.release_tag }}
       release_note: ${{ steps.get-release-notes.outputs.release_note }}
       release_version: ${{ steps.get-release-notes.outputs.release_version }}
+      release_title: ${{ steps.get-release-notes.outputs.release_title }}
+      release_url: ${{ steps.get-release-notes.outputs.release_url }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -36,6 +38,8 @@ jobs:
             console.log(JSON.stringify(data));
             core.setOutput('release_id', data.id);
             core.setOutput('release_tag', data.tag_name);
+            core.setOutput('release_title', data.name);
+            core.setOutput('release_url', data.html_url);
       - name: get release notes
         id: get-release-notes
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
@@ -79,7 +83,9 @@ jobs:
             const notes = process.env.release_note.split(/\d+\.\s/).filter(Boolean);
             const formattedNotes = notes.map(note => `* ${note.trim()}`).join("\n");
             const body = `## Release Highlight\n${formattedNotes}\n\n${data.body}`;
+
             core.setOutput('release_description', body);
+
             await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -93,11 +99,14 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         env:
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          release_tag: ${{ needs.get-release.outputs.release_tag }}
+          release_title: ${{ needs.get-release.outputs.release_title }}
+          release_url: ${{ needs.get-release.outputs.release_url }}
           release_description: ${{ steps.update-release.outputs.release_description }}
         with:
           script: |
             let payload = process.env.release_description;
-            console.log(JSON.stringify(github));
+            console.log(JSON.stringify(context));
             console.log(JSON.stringify(payload));
 
             // Replace @username with markdown link
@@ -123,8 +132,10 @@ jobs:
             // Reinsert the original markdown links
             payload = processedText.replace(/__MARKDOWN_LINK_PLACEHOLDER_(\d+)__/g, (match, index) => markdownLinks[parseInt(index, 10)]);
             
-            console.log(JSON.stringify(payload));
-            
+            const embedTitle = (process.env.release_title || process.env.release_tag || '').substring(0, 256);
+            const embedUrl = process.env.release_url;
+            const embedDescription = (payload || '').substring(0, 4096);
+
             let attempt = 0;
             while (attempt <= 3) {
                 try {
@@ -134,8 +145,9 @@ jobs:
                             username: 'GitHub',
                             avatar_url: 'https://avatars.githubusercontent.com/u/9919',
                             embeds: [{
-                                title: 'New Release',
-                                description: payload
+                                title: embedTitle,
+                                url: embedUrl,
+                                description: embedDescription
                             }]
                         }),
                         headers: { 'Content-Type': 'application/json' }
